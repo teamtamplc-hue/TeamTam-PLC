@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Helpers
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+    function isVerifiedUser() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email == "teamtamplc@gmail.com" && request.auth.token.email_verified == true;
+    }
+    
+    function isValidWaitlist(data) {
+      return data.fullName is string && data.fullName.size() <= 100
+        && data.email is string && data.email.size() <= 100
+        && data.countryCode is string && data.countryCode.size() <= 10
+        && data.phoneNumber is string && data.phoneNumber.size() <= 30
+        && data.platforms is list && data.platforms.size() <= 3
+        && (data.platforms.size() == 0 || data.platforms[0] is string)
+        && data.instagramUrl is string && data.instagramUrl.size() <= 500
+        && data.youtubeUrl is string && data.youtubeUrl.size() <= 500
+        && data.twitterUrl is string && data.twitterUrl.size() <= 500
+        && data.monthlyRevenue is string && data.monthlyRevenue.size() <= 50
+        && data.selectedTier is string && data.selectedTier.size() <= 20
+        && data.ownerId == request.auth.uid;
+    }
+
+    match /waitlist/{uid} {
+      allow get: if isSignedIn() && (uid == request.auth.uid || isAdmin());
+      allow list: if isAdmin();
+      
+      allow create: if isVerifiedUser() 
+        && isValidId(uid) 
+        && uid == request.auth.uid
+        && incoming().keys().hasAll(['fullName', 'email', 'countryCode', 'phoneNumber', 'platforms', 'instagramUrl', 'youtubeUrl', 'twitterUrl', 'monthlyRevenue', 'selectedTier', 'ownerId', 'createdAt', 'updatedAt'])
+        && incoming().keys().size() == 13
+        && isValidWaitlist(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+        
+      allow update: if isVerifiedUser() 
+        && isValidId(uid)
+        && uid == request.auth.uid
+        && isValidWaitlist(incoming())
+        && incoming().updatedAt == request.time
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['fullName', 'email', 'countryCode', 'phoneNumber', 'platforms', 'instagramUrl', 'youtubeUrl', 'twitterUrl', 'monthlyRevenue', 'selectedTier', 'updatedAt']);
+        
+      allow delete: if isVerifiedUser() && uid == request.auth.uid;
+    }
+  }
+}

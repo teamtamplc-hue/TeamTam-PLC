@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Remix: Track 1on1",
+  "description": "Super stylized SaaS landing page featuring a realistic and interactive tactile chalkboard for tracking content to sales pipelines.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

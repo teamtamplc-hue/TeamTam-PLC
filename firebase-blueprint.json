@@ -1,0 +1,31 @@
+{
+  "entities": {
+    "WaitlistApplication": {
+      "title": "Waitlist Application",
+      "description": "Exclusive beta waitlist application details for a creator.",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string", "description": "Full name of the creator" },
+        "email": { "type": "string", "description": "Authenticated email address" },
+        "countryCode": { "type": "string", "description": "Country dial code" },
+        "phoneNumber": { "type": "string", "description": "Phone number" },
+        "platforms": { "type": "array", "description": "Platforms the creator creates on" },
+        "instagramUrl": { "type": "string", "description": "Instagram channel URL" },
+        "youtubeUrl": { "type": "string", "description": "YouTube channel URL" },
+        "twitterUrl": { "type": "string", "description": "Twitter / X handle or link" },
+        "monthlyRevenue": { "type": "string", "description": "Approximate monthly revenue" },
+        "selectedTier": { "type": "string", "description": "SaaS pricing tier" },
+        "ownerId": { "type": "string", "description": "The UID of the authenticated user" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["fullName", "email", "countryCode", "phoneNumber", "platforms", "monthlyRevenue", "selectedTier", "ownerId", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/waitlist/{uid}": {
+      "schema": "WaitlistApplication",
+      "description": "Creator waitlist application stored by user UID"
+    }
+  }
+}
